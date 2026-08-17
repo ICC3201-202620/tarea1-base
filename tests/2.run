@@ -1,0 +1,1 @@
+../icc3201-syscalls_tester/run-xv6-command.exp CPUS=1 Makefile.test test_2 | grep XV6_TEST_OUTPUT

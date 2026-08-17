@@ -1,0 +1,6 @@
+../icc3201-syscalls_tester/xv6-edit-makefile.sh Makefile test_1,test_2 > Makefile.test
+cp -f tests/test_1.c user/test_1.c
+cp -f tests/test_2.c user/test_2.c
+make -f Makefile.test clean
+make -f Makefile.test kernel/xv6.img
+make -f Makefile.test user/fs.img
