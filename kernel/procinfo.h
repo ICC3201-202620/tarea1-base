@@ -17,5 +17,6 @@ struct procinfo {
   int sz;
   int rtime;
   int wtime;
+  int priority; // MLFQ level: 0 (high) or 1 (low)
   char name[PROC_NAME_LEN];
 };

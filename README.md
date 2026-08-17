@@ -179,6 +179,7 @@ struct procinfo {
   int sz;                      // memoria de usuario, en bytes
   int rtime;                   // ticks acumulados en RUNNING
   int wtime;                   // ticks acumulados en RUNNABLE
+  int priority;                // nivel MLFQ: 0 (alta) o 1 (baja)
   char name[PROC_NAME_LEN];    // nombre del proceso
 };
 ```
@@ -186,8 +187,8 @@ struct procinfo {
 No elimines ni cambies el significado de esos campos. El header también define
 las constantes públicas `PSTATE_UNUSED`, `PSTATE_EMBRYO`, `PSTATE_SLEEPING`,
 `PSTATE_RUNNABLE`, `PSTATE_RUNNING` y `PSTATE_ZOMBIE`, cuyos valores respetan
-el orden de los estados internos de xv6. En la Parte 2 podrás extender la
-estructura con la información de planificación que allí se solicite.
+el orden de los estados internos de xv6. El campo `priority` se usará en la
+Parte 2; no es necesario completarlo para la Parte 1.
 
 La syscall tendrá la siguiente firma:
 
@@ -381,16 +382,16 @@ promoción o boost.
 
 ### Datos y lugares de modificación
 
-Extiende `struct proc` con los campos mínimos necesarios, por ejemplo:
+El código base ya declara en `struct proc` los campos mínimos de apoyo:
 
 ```c
 int priority;       // MLFQ_HIGH o MLFQ_LOW
 int slice_ticks;    // ticks consumidos en el quantum vigente
 ```
 
-Inicializa ambos campos en `allocproc()`. Los hijos creados con `fork()`
-también deben comenzar en nivel 0; no heredan una penalización de prioridad del
-padre.
+`allocproc()` ya los inicializa para que los procesos nuevos —incluidos los
+hijos creados con `fork()`— comiencen en nivel 0. Debes completar las
+actualizaciones posteriores: democión, promoción y boost.
 
 Debes revisar principalmente:
 
@@ -399,7 +400,7 @@ Debes revisar principalmente:
 - `kernel/trap.c`: actualización del quantum y boost desde la interrupción de
   timer, antes del `yield()` ya provisto por xv6;
 - `kernel/proc.h`: campos y constantes de planificación; y
-- `Makefile`: incorporación de `schedtest` a `UPROGS`.
+- `Makefile`: habilitación de `schedtest` en `UPROGS`.
 
 La interrupción de timer ya provoca que el proceso corriente ceda la CPU tras
 cada tick. Por ello, un quantum de tres ticks se logra seleccionando otra vez
@@ -414,7 +415,7 @@ esa separación.
 
 ### Hacer observable la política
 
-Amplía `struct procinfo` de la Parte 1 con:
+El código base ya amplía `struct procinfo` de la Parte 1 con:
 
 ```c
 int priority;       // nivel MLFQ actual: 0 (alta) o 1 (baja)
@@ -423,9 +424,10 @@ int priority;       // nivel MLFQ actual: 0 (alta) o 1 (baja)
 Actualiza `getprocs()` y `ps` para copiar e imprimir esta columna. Así puedes
 inspeccionar los efectos del planificador sin introducir una syscall adicional.
 
-El código base incluye `schedtest`, un programa de usuario que genera al
-menos un proceso CPU-bound y un proceso interactivo que alterna trabajo breve
-con `sleep()`. Debes ejecutarlo junto con `ps` y verificar, como mínimo, que:
+El código base incluye `schedtest`, un programa de usuario que genera dos
+procesos CPU-bound y uno interactivo que alterna trabajo breve con `sleep()`.
+Cuando tengas implementadas ambas partes, descomenta `$U/_schedtest` en el
+`Makefile`, recompila y ejecútalo junto con `ps`. Verifica, como mínimo, que:
 
 - un proceso CPU-bound es degradado a nivel 1;
 - un proceso que despierta vuelve a nivel 0;
@@ -466,11 +468,8 @@ La entrega debe incluir un único `INFORME.md` con una sección llamada **Uso de
 LLMs**, incluso si no se usaron. Sigue además el protocolo de declaración de
 uso de IA definido por la Facultad. Como mínimo, indica:
 
-- herramienta y modelo aproximado;
+- herramienta y/o modelo aproximado (p.ej., Claude Sonnet u Opus 4.8, GPT 5.6, etc.);
 - para qué se utilizó;
-- archivos, funciones o fragmentos que incorporan sugerencias de la
-  herramienta; y
-- cómo el grupo verificó y comprendió el resultado.
 
 Declarar un uso responsable no reduce la nota grupal. Sin embargo, la
 responsabilidad por el código es individual además de grupal. Para verificar

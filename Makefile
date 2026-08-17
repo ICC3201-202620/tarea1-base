@@ -189,6 +189,7 @@ UPROGS=\
 	$U/_testsh\
 	$U/_nsh\
 #	$U/_ps_test\
+#	$U/_schedtest\
 
 $U/fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs $U/fs.img README $(UPROGS)
@@ -226,7 +227,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
 ifndef CPUS
-CPUS := 2
+CPUS := 1
 :i
 endif
 QEMUOPTS = -drive file=$U/fs.img,index=1,media=disk,format=raw -drive file=$K/xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)

@@ -88,6 +88,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = MLFQ_HIGH;
+  p->slice_ticks = 0;
 
   release(&ptable.lock);
 
@@ -330,6 +332,8 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
+    // TODO(Part 2): replace this scan with priority selection and
+    // round-robin within each MLFQ level.
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -460,8 +464,10 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
+    if(p->state == SLEEPING && p->chan == chan){
       p->state = RUNNABLE;
+      // TODO(Part 2): promote p to MLFQ_HIGH and reset its quantum.
+    }
 }
 
 // Wake up all processes sleeping on chan.
@@ -471,6 +477,14 @@ wakeup(void *chan)
   acquire(&ptable.lock);
   wakeup1(chan);
   release(&ptable.lock);
+}
+
+// Called from the timer interrupt, without ptable.lock held.
+// TODO(Part 2): account for the running process quantum and implement
+// the periodic priority boost.
+void
+mlfq_tick(void)
+{
 }
 
 // Kill the process with the given pid.

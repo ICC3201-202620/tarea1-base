@@ -34,6 +34,13 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+// Simplified MLFQ policy used in Part 2.
+#define MLFQ_HIGH            0
+#define MLFQ_LOW             1
+#define QUANTUM_HIGH         1
+#define QUANTUM_LOW          3
+#define MLFQ_BOOST_INTERVAL  50
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -49,6 +56,8 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int priority;                // MLFQ_HIGH or MLFQ_LOW
+  int slice_ticks;             // Ticks consumed in the current quantum
 };
 
 // Process memory is laid out contiguously, low addresses first:
