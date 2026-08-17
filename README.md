@@ -165,10 +165,9 @@ El propósito no es replicar todas las opciones de `ps`, sino comprender:
 
 ## Interfaz requerida
 
-Debes definir una estructura visible tanto para el kernel como para programas
-de usuario. Ubícala en un header nuevo, por ejemplo `kernel/procinfo.h`: el
-`Makefile` ya agrega `kernel/` a la ruta de inclusión de ambos. La estructura
-debe contener, al menos, estos campos y tipos:
+El código base ya incluye `kernel/procinfo.h`, un header visible tanto para el
+kernel como para programas de usuario; el `Makefile` agrega `kernel/` a la ruta
+de inclusión de ambos. Este header define la interfaz pública requerida:
 
 ```c
 #define PROC_NAME_LEN 16
@@ -184,11 +183,11 @@ struct procinfo {
 };
 ```
 
-Puedes agregar campos que sean útiles para la Parte 2, pero no elimines ni
-cambies el significado de los anteriores. Define también constantes públicas
-con un prefijo que no colisione con el `enum` interno, por ejemplo
-`PSTATE_UNUSED`, `PSTATE_EMBRYO`, `PSTATE_SLEEPING`, `PSTATE_RUNNABLE`,
-`PSTATE_RUNNING` y `PSTATE_ZOMBIE`, en el mismo orden que los estados de xv6.
+No elimines ni cambies el significado de esos campos. El header también define
+las constantes públicas `PSTATE_UNUSED`, `PSTATE_EMBRYO`, `PSTATE_SLEEPING`,
+`PSTATE_RUNNABLE`, `PSTATE_RUNNING` y `PSTATE_ZOMBIE`, cuyos valores respetan
+el orden de los estados internos de xv6. En la Parte 2 podrás extender la
+estructura con la información de planificación que allí se solicite.
 
 La syscall tendrá la siguiente firma:
 
@@ -274,10 +273,20 @@ tener distinto espaciado, pero la salida debe contener todos los campos
 requeridos. El programa debe manejar un retorno `-1` de la syscall e informar
 un error comprensible.
 
-El código base final incluirá un programa de prueba `ps_test`. Este creará
-procesos con cargas CPU-bound y procesos que se duermen, y verificará los casos
-límite de la interfaz. Debes usarlo para validar tu solución, pero no debes
-modificarlo.
+El código base incluye `user/ps_test.c`. Este programa prueba los casos
+`max == 0` y `max < 0`; crea un hijo CPU-bound y otro que se duerme; y comprueba
+que una instantánea contenga procesos vivos con estados y contadores válidos.
+Debes usarlo para validar tu solución, pero no debes modificarlo.
+
+Una vez implementada la syscall y sus enlaces, descomenta la entrada
+`$U/_ps_test` del `Makefile`, recompila xv6 y ejecútalo desde su shell:
+
+```sh
+$ ps_test
+ps_test: PASS
+```
+
+El test no reemplaza tus propias pruebas ni los casos privados de evaluación.
 
 ## Criterios de evaluación de la Parte 1
 

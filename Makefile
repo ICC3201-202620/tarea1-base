@@ -188,6 +188,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_testsh\
 	$U/_nsh\
+#	$U/_ps_test\
 
 $U/fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs $U/fs.img README $(UPROGS)
@@ -302,4 +303,3 @@ export QEMU_CMD := $(QEMU) -nographic $(QEMUOPTS)
 .PHONY: print-qemu-cmd dist-test dist
 print-qemu-cmd:
 	@echo $(QEMU) -nographic $(QEMUOPTS)
-
