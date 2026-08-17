@@ -147,7 +147,7 @@ gdb kernel/kernel
 Dentro del kernel puedes usar `cprintf()` para depurar. Ante una condición
 irrecuperable, `panic()` imprime información de depuración y detiene xv6.
 
-# Parte 1 — Una syscall para `ps` (40%)
+# Parte 1 — Una syscall para `ps`
 
 ## Objetivo
 
